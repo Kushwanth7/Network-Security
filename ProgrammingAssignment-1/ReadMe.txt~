@@ -1,0 +1,63 @@
+Steps taken for generating the RSA keys.
+
+The RSA keys were generated programattically, below was the code that was used to generate the RSA private and the public key pairs, it was run twice to generate two sets of keys. One pair to use with the server, the other to use it with the client
+
+KeyPairGenerator kpg;
+try 
+{
+	kpg = KeyPairGenerator.getInstance("RSA");
+	kpg.initialize(2048);
+	serverPrivateKeyFile.createNewFile();
+	serverPublicKeyFile.createNewFile();
+	KeyPair kp = kpg.generateKeyPair();
+	serverPublicKey = kp.getPublic();
+	serverPrivateKey = kp.getPrivate();
+	// Write the public and the private keys generated above to the file	
+	ObjectOutputStream publicKeyOS = new ObjectOutputStream(new FileOutputStream(serverPublicKeyFile));
+	publicKeyOS.writeObject(serverPublicKey);
+	publicKeyOS.close();			
+	ObjectOutputStream privateKeyOS = new ObjectOutputStream(new FileOutputStream(serverPrivateKeyFile));
+	privateKeyOS.writeObject(serverPrivateKey);
+	privateKeyOS.close();
+} 
+catch (NoSuchAlgorithmException e) 
+{
+	e.printStackTrace();
+} 
+catch (IOException e) 
+{	
+	e.printStackTrace();
+}
+			
+The above is the code that was used to generate the server client and private keys, the same code was run to generate the key pair for the client
+
+===============================================================================================================================================
+
+Client:
+Client expects 7 parameters
+1st parameter is the password
+2nd parameter is the path of the file to be encrypted
+3rd parameter is the server ip address
+4th parameter is the port number
+5th paramter is the name of the client private key
+6th parameter is the name of the Client public key
+7th parameter is the name of the Server public key
+
+Before starting the Client program, please ensure to place the RSA key files, Client private key, Client public key and Server public key in the same directory as the ClientSocket.java file
+
+An example command is
+java ClientSocket abcdefghijklmnop /home/ashashantharam/Desktop/Columbia/NetworkSecurity/todo.txt 127.0.0.1 6066 clientPrivate.key clientPublic.key serverPublic.key
+
+
+Server:
+Server takes 5 parameters
+1st parameter is the port number
+2nd paramter is the mode in which the server has to run (t means the server runs in trusted mode, u means the server runs in untrusted mode)
+3rd parameter is the Server private key
+4th parameter is the Server public key
+5th parameter is the client public key
+
+Before starting the Server program, please ensure to place the RSA key files, Server private key, Server public key and Client public key in the same directory as the Server.java file
+
+An example command for starting the server is 
+java Server 6067 t serverPrivate.key serverPublic.key clientPublic.key 

@@ -1,0 +1,13 @@
+client side
+1) Encrypt the file or the contents of the file using AES in CBC mode using the user entered password as the key
+2) Hash the plaintext and encrypt the hash using clients private
+key (This ensures the signature is verified)
+3) Encrypt the key(password) using servers public key
+
+Server
+1) Decrypt the aes key using the servers private key
+2) Decrypt the content using the AES key obtained above
+3) Compute the hash of the decrypted content
+4) Decrypt the signature using the clients public key
+5) Compare the hashes obtained in step 3 and step 4, if they are same then the signature verification passed, else it failed
+

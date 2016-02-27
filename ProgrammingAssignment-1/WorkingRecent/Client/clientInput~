@@ -1,0 +1,1 @@
+java ClientSocket localhost 6066 abcdefghijklmnop /home/ashashantharam/Desktop/Columbia/NetworkSecurity/todo.txt clientPrivate.key clientPublic.key serverPublic.key
