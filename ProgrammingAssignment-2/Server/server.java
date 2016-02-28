@@ -1,6 +1,7 @@
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -93,6 +94,7 @@ public class server extends Thread
 	    				continue;
 	    			if(userInput.equals("stop"))
 	    			{
+	    				System.out.println("User has requested for the connection to be closed");
 	    				break;
 	    			}
 	    			parseUserParameters(userInput);
@@ -129,32 +131,45 @@ public class server extends Thread
         
         try
         {
-        	is = new FileInputStream(fileName + ".sha256");
-        	dis = new DataInputStream(is);
-        	hash = new byte[dis.available()];
-        	dis.readFully(hash);
-        	
-        	is = new FileInputStream(fileName);
-        	dis = new DataInputStream(is);
-        	file = new byte[dis.available()];
-        	dis.readFully(file);
-        	
-        	OutputStream outToClient = server.getOutputStream();
-        	DataOutputStream out = new DataOutputStream(outToClient);
-        	
-        	// write the hash to the socket
-        	for(int i=0;i<hash.length;i++)
+        	File f = new File(fileName);
+        	File fSha = new File(fileName + ".sha256");
+        	if(!f.exists() || !fSha.exists() || !f.canRead() || !fSha.canRead())
         	{
-        		out.write(hash[i]);
+        		OutputStream outToClient = server.getOutputStream();
+	        	DataOutputStream out = new DataOutputStream(outToClient);
+	        	out.writeUTF("Cannot Retrieve");
+	        	return;
         	}
-        	
-        	// write the file length to the socket
-        	out.writeInt(file.length);
-        	
-        	
-        	for(int i=0;i<file.length;i++)
+        	else
         	{
-        		out.write(file[i]);
+	        	is = new FileInputStream(fileName + ".sha256");
+	        	dis = new DataInputStream(is);
+	        	hash = new byte[dis.available()];
+	        	dis.readFully(hash);
+	        	
+	        	is = new FileInputStream(fileName);
+	        	dis = new DataInputStream(is);
+	        	file = new byte[dis.available()];
+	        	dis.readFully(file);
+	        	
+	        	OutputStream outToClient = server.getOutputStream();
+	        	DataOutputStream out = new DataOutputStream(outToClient);
+	        	
+	        	// write the hash to the socket
+	        	out.writeUTF("Retrieving");
+	        	for(int i=0;i<hash.length;i++)
+	        	{
+	        		out.write(hash[i]);
+	        	}
+	        	
+	        	// write the file length to the socket
+	        	out.writeInt(file.length);
+	        	
+	        	
+	        	for(int i=0;i<file.length;i++)
+	        	{
+	        		out.write(file[i]);
+	        	}
         	}
         }
 		catch (Exception e)
@@ -224,9 +239,12 @@ public class server extends Thread
 		{
 			String[] splits = userInput.split("\\s+");
 			status = splits[0];
+			String filePath;
 			if(status.equals("get"))
 			{
-				fileName = splits[1];
+				filePath = splits[1];
+				String[] splitFilePath = filePath.split("/");
+				fileName = splitFilePath[splitFilePath.length-1];
 				encryptionStatus = splits[2];
 				if(encryptionStatus.equals("E"))
 				{
@@ -235,7 +253,9 @@ public class server extends Thread
 			}
 			else if(status.equals("put"))
 			{
-				fileName = splits[1];
+				filePath = splits[1];
+				String[] splitFilePath = filePath.split("/");
+				fileName = splitFilePath[splitFilePath.length-1];
 				encryptionStatus = splits[2];
 				if(encryptionStatus.equals("E"))
 				{

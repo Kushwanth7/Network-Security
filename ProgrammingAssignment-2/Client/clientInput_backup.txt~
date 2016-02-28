@@ -14,7 +14,7 @@ java client 128.59.15.73 6066 clientkeystore.jks clientTrustStore columbia colum
 
 get /home/ashashantharam/Desktop/Columbia/NetworkSecurity/4180_2016_prog2.pdf N
 
-get /home/ashashantharam/Desktop/Columbia/NetworkSecurity/4180_2016_prog2.pdf E abcdefghijklmnop
+get /home/ashashantharam/Desktop/Columbia/NetworkSecurity/4180_2016_prog2.pdf abcdefghijklmnop
 
 put /home/ashashantharam/Desktop/Columbia/NetworkSecurity/4180_2016_prog2.pdf N
 

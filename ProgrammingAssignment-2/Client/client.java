@@ -2,6 +2,7 @@
 import java.util.Random;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -57,6 +58,11 @@ public class client
 			Scanner terminalInput = new Scanner(System.in);
 			userInput = terminalInput.nextLine();
 			String[] splits = userInput.split("\\s+");
+			if(splits.length == 0)
+			{
+				System.out.println("Please provide the parameters");
+				acceptUserParameters();
+			}
 			status = splits[0];
 			if(status.equals("stop"))
 			{
@@ -64,21 +70,46 @@ public class client
 			}
 			else if(status.equals("get"))
 			{
+				if(splits.length <= 2 )
+				{
+					System.out.println("A minimum of 3 parameters is expected for get operation");
+					acceptUserParameters();
+				}
 				fileName = splits[1];
 				encryptionStatus = splits[2];
 				if(encryptionStatus.equals("E"))
 				{
+					if(splits.length <= 3)
+					{
+						System.out.println("4 parameters expected for the get operation in E mode");
+						acceptUserParameters();
+					}
 					password = splits[3];
 				}
 			}
 			else if(status.equals("put"))
 			{
+				if(splits.length <= 2 )
+				{
+					System.out.println("A minimum of 3 parameters is expected for put operation");
+					acceptUserParameters();
+				}
 				fileName = splits[1];
 				encryptionStatus = splits[2];
 				if(encryptionStatus.equals("E"))
 				{
+					if(splits.length <= 3)
+					{
+						System.out.println("4 parameters expected for the put operation in E mode");
+						acceptUserParameters();
+					}
 					password = splits[3];
 				}
+			}
+			else
+			{
+				System.out.println("The system cannot understand the parameters entered, please include get, put or stop along with relevant parameters");
+				acceptUserParameters();
 			}
 		}
 		catch(Exception e)
@@ -122,7 +153,15 @@ public class client
 		byte readByte;
 		try 
 		{
+			
 			DataInputStream in = new DataInputStream(client.getInputStream());
+			Thread.sleep(1000);
+        	String fileStatus = in.readUTF();
+        	if(fileStatus.equals("Cannot Retrieve"))
+        	{
+        		System.out.println("The file cannot be retrieved");
+        		return;
+        	}
         	int count = 0;
             while(count < 64)
             {
@@ -175,11 +214,17 @@ public class client
 		byte[] hash = new byte[64];
 		byte[] fileBytes = new byte[1024000];
 		byte readByte;
+		
 		try 
 		{
 			DataInputStream in = new DataInputStream(client.getInputStream());
-        	if(in.available() == 0)
-        		Thread.sleep(1000);
+			Thread.sleep(1000);
+        	String fileStatus = in.readUTF();
+        	if(fileStatus.equals("Cannot Retrieve"))
+        	{
+        		System.out.println("The file cannot be retrieved");
+        		return;
+        	}
         	int count = 0;
             while(count < 64)
             {
@@ -256,6 +301,13 @@ public class client
         DataInputStream dis = null;
         byte[] plainText = null; // the contents of the file are read into the byte array plaintext 
         
+        File f = new File(fileName);
+        if(!f.exists() || !f.canRead())
+        {
+        	System.out.println("The file cannot be sent to the server");
+        	return;
+        }
+        
         try
         {
         	is = new FileInputStream(fileName);
@@ -324,6 +376,13 @@ public class client
 		InputStream is = null;
         DataInputStream dis = null;
         byte[] plainText = null; // the contents of the file are read into the byte array plaintext 
+
+        File f = new File(fileName);
+        if(!f.exists() || !f.canRead())
+        {
+        	System.out.println("The file cannot be sent to the server");
+        	return;
+        }
         
         try
         {
@@ -373,7 +432,6 @@ public class client
 	    OutputStream outToServer;
 		try 
 		{ 
-			// Remember you have to add the functionality of appending a iv to the cipher text before sending
 			outToServer = client.getOutputStream();
 			DataOutputStream out = new DataOutputStream(outToServer);
 			
@@ -489,6 +547,7 @@ public class client
     			}
     			if(status.equals("stop"))
     			{
+    				out.writeUTF("stop");
     				client.close();
     				break;
     			}
