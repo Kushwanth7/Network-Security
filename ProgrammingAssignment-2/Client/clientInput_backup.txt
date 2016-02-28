@@ -1,5 +1,13 @@
 java client localhost 6066 clientkeystore.jks clientTrustStore columbia columbia
 
-get serverInput.txt N
+get clientInput.txt N
 
-put serverInput.txt N
+put clientInput.txt N
+
+get clientInput.txt E abcdefghijklmnop
+
+put clientInput.txt E abcdefghijklmnop
+
+java server 6066 serverkeystore.jks serverTrustStore columbia columbia
+
+java client 128.59.15.73 6066 clientkeystore.jks clientTrustStore columbia columbia

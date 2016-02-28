@@ -1,4 +1,5 @@
 
+import java.util.Random;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
@@ -29,7 +30,23 @@ public class client
 	static String encryptionStatus;
 	static String password;
 	
-	
+
+	public static String generateAESKey(String password)
+	{
+		int seed = 0;
+		for(int i=0;i<password.length();i++)
+		{
+			seed = seed + password.charAt(i);
+		}
+		Random rand = new Random(seed);
+		StringBuilder sb = new StringBuilder();
+		for(int i=0;i<16;i++)
+		{
+			int n = rand.nextInt(27);
+			sb.append((char) ('`'+n));
+		}
+		return sb.toString();
+	}
 	
 	public static String acceptUserParameters()
 	{
@@ -174,8 +191,20 @@ public class client
             String hashHex = new String(hash);
             
             int fileByteCount = in.readInt();
-            //read the file bytes that is sent by the client
-            
+            //read the file bytes that is sent by the server
+            /*
+             * First 16 bytes are that of the initialization vector,
+             * the remaining bytes are that of the file
+             */
+            byte[] initBytes = new byte[16];
+            count = 0;
+            while(count < 16)
+            {
+            	readByte = in.readByte();
+            	initBytes[count] = readByte;
+            	count++;
+            }
+            fileByteCount = fileByteCount-16;
             count = 0;
             while(count < fileByteCount)
             {
@@ -188,13 +217,13 @@ public class client
             {
             	actualFile[i] = fileBytes[i];
             }
-            
+            String key = generateAESKey(password);
             // decrypt the file that is received from the server
             Cipher cipher;
-    		String initVector = "RandomInitVector";
+    		String initVector = new String(initBytes);
     		cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 			IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
-			SecretKeySpec skeySpec = new SecretKeySpec(password.getBytes("UTF-8"), "AES");
+			SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
 			cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
 			byte[] originalText = cipher.doFinal(actualFile);
 			
@@ -323,7 +352,7 @@ public class client
 			return;
 		}
         
-        String key = password;
+        String key = generateAESKey(password);
 	    String initVector = "RandomInitVector"; //The initilaization Vector used is RandomInitVector, it is of 16 bytes in length and both client and the server have agreed upon the same
 	    Cipher cipher;
 	    byte[] encrypted = null; // the plain text bytes encrypted are stored in the byte array encrypted
@@ -340,7 +369,7 @@ public class client
 	    	System.out.println("An exception has occurred : " + e.getMessage());
 	    	return;
 	    }
-	    
+	    byte[] initVectorBytes = initVector.getBytes();
 	    OutputStream outToServer;
 		try 
 		{ 
@@ -354,7 +383,11 @@ public class client
 				out.write(hashBytes[i]);
 			}
 			
-			out.writeInt(encrypted.length);
+			out.writeInt(initVectorBytes.length + encrypted.length);
+			for(int i=0;i<initVectorBytes.length;i++)
+			{
+				out.write(initVectorBytes[i]);
+			}
 			for(int i=0;i<encrypted.length;i++)
 	        {
 				out.write(encrypted[i]);

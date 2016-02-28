@@ -1,11 +1,1 @@
-java client localhost 6066 clientkeystore.jks clientTrustStore columbia columbia
-
-get serverInput.txt N
-
-put clientInput.txt E abcdefghijklmnop
-
-get clientInput.txt E abcdefghijklmnop 
-
-put clientInput.txt N
-
-get clientInput.txt N
+RandomInitVectorÎíË”Gjè28vSX½r’I”?+c”–¥C×fı‡ÉÜÂÁ8`ÃŸááã	U§‰âİ…1ÈV`gâJ*Š¦õ&5;–ÿM8-™ÀüâÃmƒBXÙ‡wïÄa¹/Tã¨®îÅÓ¬ı› ;¢²Ú×tŠ”<ñ“ÌôĞuú—Û—õ1#UÛï¾.]Ïuçî«~ä¢ñÄ¨#¶43XrYâ$ï¤³wN¸'Io6Z?Ş7M‰)•†MßšÖx'ÂI=Â9PÎg:ÓBpøÔ=ÿEWUjHh jWp…•E+Š¤²uu4S—±Ÿ
